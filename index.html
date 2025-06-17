@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Home-Clean PWA - Track cleaning and maintenance of your home items">
+    <meta name="theme-color" content="#4CAF50">
+    <title>Home-Clean</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="icons/icon-192x192.png" type="image/png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <!-- Add idb from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Home-Clean</h1>
+        <button id="menu-toggle" aria-label="Menu">≡</button>
+    </header>
+
+    <nav id="main-nav" class="hidden">
+        <button id="close-menu" aria-label="Close menu">✕</button>
+        <ul>
+            <li><a href="#/area-types">Area Types</a></li>
+            <li><a href="#/areas">Areas</a></li>
+            <li><a href="#/area-groups">Area Groups</a></li>
+            <li><a href="#/items">Items</a></li>
+            <li><a href="#/export-import">Export/Import</a></li>
+        </ul>
+    </nav>
+
+    <main id="app-content">
+        <!-- Content will be loaded here by the router -->
+        <div class="loading">Loading...</div>
+    </main>
+
+    <button id="add-button" class="fab" aria-label="Add new">+</button>
+
+    <script type="module" src="ui/app.js"></script>
+    <script>
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
+
