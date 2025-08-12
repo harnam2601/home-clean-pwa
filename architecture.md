@@ -8,7 +8,6 @@ home-clean-pwa/
 ├── manifest.json       # PWA manifest
 ├── sw.js              # Service Worker
 ├── db.js              # IndexedDB setup and operations
-├── router.js          # Simple hash router
 ├── styles.css         # Global styles
 ├── models/            # Data models
 │   ├── areaType.js    # Area Type model
@@ -17,7 +16,7 @@ home-clean-pwa/
 │   ├── item.js        # Item model
 │   └── itemPart.js    # Item Part model
 └── ui/                # UI components
-    ├── app.js         # Main app component
+    ├── App.js         # Main app component and routes
     ├── nav.js         # Navigation component
     ├── areaTypes.js   # Area Types UI
     ├── areas.js       # Areas UI
@@ -63,11 +62,7 @@ Based on the provided data model:
 
 ## Routing
 
-Simple hash-based routing:
-- `#/area-types` - List of Area Types
-- `#/area-types/new` - Create new Area Type
-- `#/area-types/:id` - Edit Area Type
-- Similar patterns for other entities
+Routing is handled by [`preact-router`](https://github.com/preactjs/preact-router) using clean URLs such as `/area-types` or `/areas/:id`. When hosting on S3 or other static file services, configure the site so that all paths fall back to `index.html` to support client-side routing.
 
 ## UI Components
 

@@ -10,7 +10,7 @@ A 100% offline-first, single-user Progressive Web App (PWA) that helps you track
 - **Items Management**: Track unique physical objects located in specific areas (e.g., Fridge in Kitchen).
 - **Item Parts Management**: Define sub-components of items that need maintenance (e.g., Fridge → Door Seal).
 - **Maintenance Tracking**: Each item part stores frequency (in days) and last maintenance date, with color-coded status indicators.
-- **Simple Navigation**: Easy-to-use interface with hamburger menu navigation.
+- **Simple Navigation**: Easy-to-use interface with hamburger menu navigation built with `preact-router`.
 - **Offline Functionality**: Works 100% offline with all data stored locally on your device.
 - **Export/Import**: Backup and restore your data to transfer between devices.
 
@@ -44,6 +44,10 @@ A 100% offline-first, single-user Progressive Web App (PWA) that helps you track
    ```
    or any other static file server
 4. Open `http://localhost:8080` in your browser
+
+## Deployment
+
+When hosting on AWS S3 or similar static file services, set both the index document and error document to `index.html`. This ensures that all routes managed by `preact-router` correctly fall back to the main page.
 
 ## Usage Guide
 
@@ -112,7 +116,7 @@ To backup or transfer your data:
 
 ## Technical Details
 
-- Built with vanilla JavaScript (no frameworks)
+- Built with [Preact](https://preactjs.com/) and [`preact-router`](https://github.com/preactjs/preact-router)
 - Uses IndexedDB for local storage via the lightweight idb library
 - Implements the Progressive Web App standard for offline functionality
 - Responsive design works on mobile and desktop devices

@@ -1,7 +1,6 @@
 // Item Parts UI component
 import * as ItemPartModel from '../models/itemPart.js';
 import { calculateStatus } from '../db.js';
-import router from './app.js';
 
 // Detail view
 export async function detailView(id) {

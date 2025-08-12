@@ -14,32 +14,11 @@
     <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Home-Clean</h1>
-        <button id="menu-toggle" aria-label="Menu">≡</button>
-    </header>
-
-    <nav id="main-nav" class="hidden">
-        <button id="close-menu" aria-label="Close menu">✕</button>
-        <ul>
-            <li><a href="#/area-types">Area Types</a></li>
-            <li><a href="#/areas">Areas</a></li>
-            <li><a href="#/area-groups">Area Groups</a></li>
-            <li><a href="#/items">Items</a></li>
-            <li><a href="#/export-import">Export/Import</a></li>
-        </ul>
-    </nav>
-
-    <main id="app-content">
-        <div id="app"></div>
-    </main>
-
-    <button id="add-button" class="fab" aria-label="Add new">+</button>
+    <div id="app"></div>
 
     <script type="module">
-        import { html, render } from 'https://esm.sh/htm/preact/standalone';
-        import Router from 'https://esm.sh/preact-router';
-        import App from './ui/app.js';
+        import { html, render } from 'https://esm.sh/htm/preact/standalone?deps=preact@10';
+        import { App } from './ui/App.js';
 
         render(html`<${App}/>`, document.getElementById('app'));
     </script>
