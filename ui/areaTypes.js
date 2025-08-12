@@ -1,10 +1,11 @@
 import { html, useState, useEffect } from 'https://esm.sh/htm/preact/standalone';
 import { route } from 'https://esm.sh/preact-router';
+import { areaTypes, loadAreaTypes, createAreaType, updateAreaType, removeAreaType } from '../state/store.js';
 import * as AreaTypeModel from '../models/areaType.js';
 
 export function AreaTypeList() {
-  const [types, setTypes] = useState([]);
-  useEffect(() => { AreaTypeModel.getAll().then(setTypes); }, []);
+  useEffect(() => { loadAreaTypes(); }, []);
+  const types = areaTypes.value;
   return html`
     <div class="card">
       <h2>Area Types</h2>
@@ -60,7 +61,7 @@ export function AreaTypeCreate() {
     e.preventDefault();
     if (!name.trim()) return alert('Please enter a name');
     try {
-      await AreaTypeModel.create({ name });
+      await createAreaType({ name });
       route('/area-types');
     } catch (err) {
       alert('Error creating area type: ' + err.message);
@@ -92,7 +93,7 @@ export function AreaTypeEdit({ id }) {
     e.preventDefault();
     if (!name.trim()) return alert('Please enter a name');
     try {
-      await AreaTypeModel.update({ id: parseInt(id), name });
+      await updateAreaType({ id: parseInt(id), name });
       route('/area-types');
     } catch (err) {
       alert('Error updating area type: ' + err.message);
@@ -101,7 +102,7 @@ export function AreaTypeEdit({ id }) {
   const remove = async () => {
     if (!confirm('Are you sure you want to delete this area type? This will also delete all associated areas.')) return;
     try {
-      await AreaTypeModel.remove(parseInt(id));
+      await removeAreaType(parseInt(id));
       route('/area-types');
     } catch (err) {
       alert('Error deleting area type: ' + err.message);
