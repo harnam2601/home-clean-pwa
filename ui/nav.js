@@ -1,6 +1,5 @@
-import { html } from 'https://esm.sh/htm/preact?deps=preact@10';
-import { Link } from 'https://esm.sh/preact-router?deps=preact@10';
-import { useState } from 'https://esm.sh/preact/hooks?deps=preact@10';
+import { html, useState } from 'https://esm.sh/htm/preact/standalone';
+import { Link } from 'https://esm.sh/preact-router';
 
 // Navigation component using preact-router Link
 export const Nav = () => {
