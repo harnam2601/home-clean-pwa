@@ -1,310 +1,164 @@
-// Items UI component
+import { html, useState, useEffect } from 'https://esm.sh/htm/preact/standalone';
+import { route } from 'https://esm.sh/preact-router';
 import * as ItemModel from '../models/item.js';
-import { calculateStatus } from '../db.js';
 
-// List view
-export async function listView() {
-  const items = await ItemModel.getAll();
-  const areas = await ItemModel.getAllAreas();
-  
-  // Create a map of area IDs to names for quick lookup
-  const areaMap = {};
-  areas.forEach(area => {
-    areaMap[area.id] = area.name;
-  });
-  
-  // Get all item parts for status calculation
-  for (const item of items) {
-    const parts = await ItemModel.getItemParts(item.id);
-    
-    // Calculate worst status for each item
-    if (parts.length > 0) {
-      const statuses = parts.map(part => calculateStatus(part.freqDays, part.lastDoneAt));
-      
-      if (statuses.includes('red')) {
-        item.status = 'red';
-      } else if (statuses.includes('yellow')) {
-        item.status = 'yellow';
-      } else {
-        item.status = 'green';
-      }
-    } else {
-      item.status = 'none';
-    }
-  }
-  
-  // Sort items by status (red, yellow, green, none)
-  const statusOrder = { red: 0, yellow: 1, green: 2, none: 3 };
-  items.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
-  
-  let html = `
+export function ItemList() {
+  const [items, setItems] = useState([]);
+  const [areaMap, setAreaMap] = useState({});
+  useEffect(() => {
+    Promise.all([ItemModel.getAll(), ItemModel.getAllAreas()]).then(([i, areas]) => {
+      const map = {};
+      areas.forEach(a => { map[a.id] = a.name; });
+      setItems(i);
+      setAreaMap(map);
+    });
+  }, []);
+  return html`
     <div class="card">
       <h2>Items</h2>
       <div class="list">
-  `;
-  
-  if (items.length === 0) {
-    html += `<p class="empty-list">No items found. Add your first one!</p>`;
-  } else {
-    items.forEach(item => {
-      const areaName = areaMap[item.areaId] || 'Unknown';
-      const statusClass = item.status ? `status-${item.status}` : '';
-      const statusDot = item.status ? `<span class="status ${statusClass}"></span>` : '';
-      
-      html += `
-        <div class="list-item" data-id="${item.id}" onclick="window.location.hash = '/items/${item.id}'">
-          <span>${item.name} <small>(${areaName})</small></span>
-          ${statusDot}
-        </div>
-      `;
-    });
-  }
-  
-  html += `
+        ${items.length === 0
+          ? html`<p class="empty-list">No items found. Add your first one!</p>`
+          : items.map(it => html`
+              <div class="list-item" data-id=${it.id} onClick=${() => route('/items/' + it.id)}>
+                <span>${it.name} <small>(${areaMap[it.areaId] || 'Unknown'})</small></span>
+                <span class="chevron">›</span>
+              </div>`)}
       </div>
     </div>
   `;
-  
-  return html;
 }
 
-// Detail view
-export async function detailView(id) {
-  const item = await ItemModel.getById(parseInt(id));
-  
-  if (!item) {
-    return `<div class="error">Item not found</div>`;
-  }
-  
-  const area = await ItemModel.getArea(item.areaId);
-  const itemParts = await ItemModel.getItemParts(item.id);
-  
-  // Calculate status for each item part
-  itemParts.forEach(part => {
-    part.status = calculateStatus(part.freqDays, part.lastDoneAt);
-    
-    // Calculate days since last done
-    if (part.lastDoneAt) {
-      const now = new Date();
-      const lastDone = new Date(part.lastDoneAt);
-      part.daysSince = Math.floor((now - lastDone) / (1000 * 60 * 60 * 24));
-    } else {
-      part.daysSince = null;
-    }
-  });
-  
-  // Sort item parts by status (red, yellow, green)
-  const statusOrder = { red: 0, yellow: 1, green: 2 };
-  itemParts.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
-  
-  let html = `
+export function ItemDetail({ id }) {
+  const [item, setItem] = useState(null);
+  const [area, setArea] = useState(null);
+  const [parts, setParts] = useState([]);
+  useEffect(() => {
+    ItemModel.getById(parseInt(id)).then(it => {
+      if (it) {
+        setItem(it);
+        ItemModel.getArea(it.areaId).then(setArea);
+        ItemModel.getItemParts(it.id).then(setParts);
+      }
+    });
+  }, [id]);
+  if (!item) return html`<div class="error">Item not found</div>`;
+  return html`
     <div class="card">
-      <h2>${item.name} <small>(${area ? area.name : 'Unknown'})</small></h2>
+      <h2>${item.name} ${area ? html`<small>(${area.name})</small>` : ''}</h2>
       <div class="actions">
-        <button class="btn-secondary" onclick="window.location.hash = '/items/${item.id}/edit'">Edit</button>
+        <button class="btn-secondary" onClick=${() => route('/items/' + item.id + '/edit')}>Edit</button>
       </div>
     </div>
-    
     <div class="card">
       <h3>Parts</h3>
       <div class="list">
-  `;
-  
-  if (itemParts.length === 0) {
-    html += `<p class="empty-list">No parts for this item yet.</p>`;
-  } else {
-    itemParts.forEach(part => {
-      const statusClass = `status-${part.status}`;
-      const lastDoneText = part.lastDoneAt 
-        ? `${part.daysSince} days ago (${new Date(part.lastDoneAt).toLocaleDateString()})`
-        : 'Never';
-      
-      html += `
-        <div class="list-item" data-id="${part.id}" onclick="window.location.hash = '/item-parts/${part.id}'">
-          <div>
-            <div>${part.name}</div>
-            <div class="item-part-details">
-              <small>Every ${part.freqDays} days | Last done: ${lastDoneText}</small>
-            </div>
-          </div>
-          <span class="status ${statusClass}"></span>
-        </div>
-      `;
-    });
-  }
-  
-  html += `
+        ${parts.length === 0
+          ? html`<p class="empty-list">No parts for this item yet.</p>`
+          : parts.map(p => html`
+              <div class="list-item" data-id=${p.id} onClick=${() => route('/item-parts/' + p.id)}>
+                <span>${p.name}</span>
+                <span class="chevron">›</span>
+              </div>`)}
+      </div>
+      <div class="actions">
+        <button class="btn-primary" onClick=${() => route('/item-parts/new?itemId=' + item.id)}>Add Part</button>
       </div>
     </div>
   `;
-  
-  return html;
 }
 
-// Create view
-export async function createView() {
-  // Get query parameters
-  const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
-  const preselectedAreaId = urlParams.get('areaId');
-  
-  const areas = await ItemModel.getAllAreas();
-  
-  let html = `
+export function ItemCreate() {
+  const [name, setName] = useState('');
+  const [areaId, setAreaId] = useState('');
+  const [areas, setAreas] = useState([]);
+  useEffect(() => { ItemModel.getAllAreas().then(setAreas); }, []);
+  const submit = async e => {
+    e.preventDefault();
+    if (!name.trim() || !areaId) return alert('Please fill out all fields');
+    try {
+      const id = await ItemModel.create({ name, areaId: parseInt(areaId) });
+      route('/items/' + id);
+    } catch (err) {
+      alert('Error creating item: ' + err.message);
+    }
+  };
+  return html`
     <div class="card">
       <h2>New Item</h2>
-      <form id="item-form">
+      <form onSubmit=${submit}>
         <div class="form-group">
           <label for="name">Name</label>
-          <input type="text" id="name" name="name" required>
+          <input id="name" name="name" value=${name} onInput=${e => setName(e.target.value)} required />
         </div>
         <div class="form-group">
           <label for="areaId">Area</label>
-          <select id="areaId" name="areaId" required>
-            <option value="">Select Area</option>
-  `;
-  
-  areas.forEach(area => {
-    const selected = preselectedAreaId && parseInt(preselectedAreaId) === area.id ? 'selected' : '';
-    html += `<option value="${area.id}" ${selected}>${area.name}</option>`;
-  });
-  
-  html += `
+          <select id="areaId" name="areaId" value=${areaId} onInput=${e => setAreaId(e.target.value)} required>
+            <option value="">Select</option>
+            ${areas.map(a => html`<option value=${a.id}>${a.name}</option>`)}
           </select>
         </div>
         <div class="btn-group">
-          <button type="button" class="btn-secondary" onclick="window.location.hash = '/items'">Cancel</button>
+          <button type="button" class="btn-secondary" onClick=${() => route('/items')}>Cancel</button>
           <button type="submit" class="btn-primary">Save</button>
         </div>
       </form>
     </div>
-    
-    <script>
-      document.getElementById('item-form').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        
-        const nameInput = document.getElementById('name');
-        const areaIdInput = document.getElementById('areaId');
-        
-        const name = nameInput.value.trim();
-        const areaId = parseInt(areaIdInput.value);
-        
-        if (!name) {
-          alert('Please enter a name');
-          return;
-        }
-        
-        if (!areaId) {
-          alert('Please select an area');
-          return;
-        }
-        
-        try {
-          const item = { name, areaId };
-          const id = await import('../models/item.js').then(module => module.create(item));
-          
-          // If we came from an area detail view, go back there
-          const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
-          const fromArea = urlParams.get('areaId');
-          
-          if (fromArea) {
-            window.location.hash = '/areas/' + fromArea;
-          } else {
-            window.location.hash = '/items';
-          }
-        } catch (error) {
-          console.error('Error creating item:', error);
-          alert('Error creating item: ' + error.message);
-        }
-      });
-    </script>
   `;
-  
-  return html;
 }
 
-// Edit view
-export async function editView(id) {
-  const item = await ItemModel.getById(parseInt(id));
-  
-  if (!item) {
-    return `<div class="error">Item not found</div>`;
-  }
-  
-  const areas = await ItemModel.getAllAreas();
-  
-  let html = `
+export function ItemEdit({ id }) {
+  const [name, setName] = useState('');
+  const [areaId, setAreaId] = useState('');
+  const [areas, setAreas] = useState([]);
+  useEffect(() => {
+    ItemModel.getById(parseInt(id)).then(it => {
+      if (it) {
+        setName(it.name);
+        setAreaId(String(it.areaId));
+      }
+    });
+    ItemModel.getAllAreas().then(setAreas);
+  }, [id]);
+  const submit = async e => {
+    e.preventDefault();
+    if (!name.trim() || !areaId) return alert('Please fill out all fields');
+    try {
+      await ItemModel.update({ id: parseInt(id), name, areaId: parseInt(areaId) });
+      route('/items');
+    } catch (err) {
+      alert('Error updating item: ' + err.message);
+    }
+  };
+  const remove = async () => {
+    if (!confirm('Are you sure you want to delete this item? This will also delete all associated parts.')) return;
+    try {
+      await ItemModel.remove(parseInt(id));
+      route('/items');
+    } catch (err) {
+      alert('Error deleting item: ' + err.message);
+    }
+  };
+  return html`
     <div class="card">
       <h2>Edit Item</h2>
-      <form id="item-form">
+      <form onSubmit=${submit}>
         <div class="form-group">
           <label for="name">Name</label>
-          <input type="text" id="name" name="name" value="${item.name}" required>
+          <input id="name" name="name" value=${name} onInput=${e => setName(e.target.value)} required />
         </div>
         <div class="form-group">
           <label for="areaId">Area</label>
-          <select id="areaId" name="areaId" required>
-  `;
-  
-  areas.forEach(area => {
-    const selected = item.areaId === area.id ? 'selected' : '';
-    html += `<option value="${area.id}" ${selected}>${area.name}</option>`;
-  });
-  
-  html += `
+          <select id="areaId" name="areaId" value=${areaId} onInput=${e => setAreaId(e.target.value)} required>
+            ${areas.map(a => html`<option value=${a.id} selected=${String(a.id)===areaId}>${a.name}</option>`)}
           </select>
         </div>
         <div class="btn-group">
-          <button type="button" class="btn-secondary" onclick="window.location.hash = '/items/${item.id}'">Cancel</button>
+          <button type="button" class="btn-secondary" onClick=${() => route('/items/' + id)}>Cancel</button>
           <button type="submit" class="btn-primary">Save</button>
-          <button type="button" class="btn-danger" id="delete-btn">Delete</button>
+          <button type="button" class="btn-danger" onClick=${remove}>Delete</button>
         </div>
       </form>
     </div>
-    
-    <script>
-      document.getElementById('item-form').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        
-        const nameInput = document.getElementById('name');
-        const areaIdInput = document.getElementById('areaId');
-        
-        const name = nameInput.value.trim();
-        const areaId = parseInt(areaIdInput.value);
-        
-        if (!name) {
-          alert('Please enter a name');
-          return;
-        }
-        
-        if (!areaId) {
-          alert('Please select an area');
-          return;
-        }
-        
-        try {
-          const item = { id: ${item.id}, name, areaId };
-          await import('../models/item.js').then(module => module.update(item));
-          window.location.hash = '/items';
-        } catch (error) {
-          console.error('Error updating item:', error);
-          alert('Error updating item: ' + error.message);
-        }
-      });
-      
-      document.getElementById('delete-btn').addEventListener('click', async () => {
-        if (confirm('Are you sure you want to delete this item? This will also delete all associated parts.')) {
-          try {
-            await import('../models/item.js').then(module => module.remove(${item.id}));
-            window.location.hash = '/items';
-          } catch (error) {
-            console.error('Error deleting item:', error);
-            alert('Error deleting item: ' + error.message);
-          }
-        }
-      });
-    </script>
   `;
-  
-  return html;
 }
-

@@ -1,6 +1,11 @@
-import { html } from 'https://esm.sh/htm/preact?deps=preact@10';
-import Router from 'https://esm.sh/preact-router?deps=preact@10';
+import { html } from 'https://esm.sh/htm/preact/standalone';
+import Router from 'https://esm.sh/preact-router';
 import { Nav } from './nav.js';
+import { AreaTypeList, AreaTypeDetail, AreaTypeCreate, AreaTypeEdit } from './areaTypes.js';
+import { AreaList, AreaDetail, AreaCreate, AreaEdit } from './areas.js';
+import { AreaGroupList, AreaGroupDetail, AreaGroupCreate, AreaGroupEdit } from './areaGroups.js';
+import { ItemList, ItemDetail, ItemCreate, ItemEdit } from './items.js';
+import { ItemPartDetail, ItemPartCreate, ItemPartEdit } from './itemParts.js';
 
 // Simple placeholder component for routes
 const Placeholder = ({ title }) => html`<div class="card"><h2>${title}</h2></div>`;
@@ -10,25 +15,25 @@ export const App = () => html`
   <main id="app-content">
     <${Router}>
       <${Placeholder} path="/" title="Home" />
-      <${Placeholder} path="/area-types" title="Area Types" />
-      <${Placeholder} path="/area-types/:id" title="Area Type Detail" />
-      <${Placeholder} path="/area-types/new" title="New Area Type" />
-      <${Placeholder} path="/area-types/:id/edit" title="Edit Area Type" />
-      <${Placeholder} path="/areas" title="Areas" />
-      <${Placeholder} path="/areas/new" title="New Area" />
-      <${Placeholder} path="/areas/:id" title="Area Detail" />
-      <${Placeholder} path="/areas/:id/edit" title="Edit Area" />
-      <${Placeholder} path="/area-groups" title="Area Groups" />
-      <${Placeholder} path="/area-groups/new" title="New Area Group" />
-      <${Placeholder} path="/area-groups/:id" title="Area Group Detail" />
-      <${Placeholder} path="/area-groups/:id/edit" title="Edit Area Group" />
-      <${Placeholder} path="/items" title="Items" />
-      <${Placeholder} path="/items/new" title="New Item" />
-      <${Placeholder} path="/items/:id" title="Item Detail" />
-      <${Placeholder} path="/items/:id/edit" title="Edit Item" />
-      <${Placeholder} path="/item-parts/new" title="New Item Part" />
-      <${Placeholder} path="/item-parts/:id" title="Item Part Detail" />
-      <${Placeholder} path="/item-parts/:id/edit" title="Edit Item Part" />
+      <${AreaTypeList} path="/area-types" />
+      <${AreaTypeDetail} path="/area-types/:id" />
+      <${AreaTypeCreate} path="/area-types/new" />
+      <${AreaTypeEdit} path="/area-types/:id/edit" />
+      <${AreaList} path="/areas" />
+      <${AreaDetail} path="/areas/:id" />
+      <${AreaCreate} path="/areas/new" />
+      <${AreaEdit} path="/areas/:id/edit" />
+      <${AreaGroupList} path="/area-groups" />
+      <${AreaGroupDetail} path="/area-groups/:id" />
+      <${AreaGroupCreate} path="/area-groups/new" />
+      <${AreaGroupEdit} path="/area-groups/:id/edit" />
+      <${ItemList} path="/items" />
+      <${ItemDetail} path="/items/:id" />
+      <${ItemCreate} path="/items/new" />
+      <${ItemEdit} path="/items/:id/edit" />
+      <${ItemPartCreate} path="/item-parts/new" />
+      <${ItemPartDetail} path="/item-parts/:id" />
+      <${ItemPartEdit} path="/item-parts/:id/edit" />
       <${Placeholder} path="/export-import" title="Export/Import" />
     <//>
   </main>
