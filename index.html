@@ -31,13 +31,18 @@
     </nav>
 
     <main id="app-content">
-        <!-- Content will be loaded here by the router -->
-        <div class="loading">Loading...</div>
+        <div id="app"></div>
     </main>
 
     <button id="add-button" class="fab" aria-label="Add new">+</button>
 
-    <script type="module" src="ui/app.js"></script>
+    <script type="module">
+        import { html, render } from 'https://esm.sh/htm/preact/standalone';
+        import Router from 'https://esm.sh/preact-router';
+        import App from './ui/app.js';
+
+        render(html`<${App}/>`, document.getElementById('app'));
+    </script>
     <script>
         // Register service worker
         if ('serviceWorker' in navigator) {
