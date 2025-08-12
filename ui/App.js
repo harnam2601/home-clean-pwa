@@ -22,7 +22,7 @@ export const App = () => {
   const onAdd = addHandlers[currentUrl];
   return html`
     <${Nav} currentUrl=${currentUrl}/>
-    <main id="app-content">
+    <main>
       <${Router} onChange=${e => setCurrentUrl(e.url)}>
         <${Placeholder} path="/" title="Home" />
         <${AreaTypeList} path="/area-types" />

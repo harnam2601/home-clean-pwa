@@ -1,6 +1,6 @@
 # Home-Clean PWA
 
-A 100% offline-first, single-user Progressive Web App (PWA) that helps you track cleaning and maintenance tasks for items in your home.
+A 100% offline-first, single-user Progressive Web App (PWA) that helps you track cleaning and maintenance tasks for items in your home. The interface is built with [Preact](https://preactjs.com/) using [HTM](https://github.com/developit/htm) for JSX-free templating and a small state manager powered by [preact signals](https://preactjs.com/guide/v10/signals/).
 
 ## Features
 
@@ -116,7 +116,8 @@ To backup or transfer your data:
 
 ## Technical Details
 
-- Built with [Preact](https://preactjs.com/) and [`preact-router`](https://github.com/preactjs/preact-router)
+- Built with [Preact](https://preactjs.com/), [HTM](https://github.com/developit/htm) and [`preact-router`](https://github.com/preactjs/preact-router)
+- State managed with a lightweight [preact signals](https://preactjs.com/guide/v10/signals/) store (`state/store.js`)
 - Uses IndexedDB for local storage via the lightweight idb library
 - Implements the Progressive Web App standard for offline functionality
 - Responsive design works on mobile and desktop devices

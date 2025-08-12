@@ -1,6 +1,8 @@
 # Home-Clean PWA Installation Guide
 
 This document provides detailed instructions for installing and deploying the Home-Clean PWA.
+The project uses [Preact](https://preactjs.com/) with [HTM](https://github.com/developit/htm) for templating and a small state
+manager built on [preact signals](https://preactjs.com/guide/v10/signals/).
 
 ## Local Development
 
