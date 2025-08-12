@@ -1,18 +1,20 @@
 import { html, useState, useEffect } from 'https://esm.sh/htm/preact/standalone';
 import { route } from 'https://esm.sh/preact-router';
+import { useComputed } from 'https://esm.sh/@preact/signals@latest?deps=preact@10';
+import { areaTypes, loadAreaTypes } from '../state/store.js';
 import * as AreaModel from '../models/area.js';
 
 export function AreaList() {
   const [areas, setAreas] = useState([]);
-  const [typeMap, setTypeMap] = useState({});
   useEffect(() => {
-    Promise.all([AreaModel.getAll(), AreaModel.getAllAreaTypes()]).then(([a, t]) => {
-      const map = {};
-      t.forEach(at => { map[at.id] = at.name; });
-      setAreas(a);
-      setTypeMap(map);
-    });
+    AreaModel.getAll().then(setAreas);
+    loadAreaTypes();
   }, []);
+  const typeMap = useComputed(() => {
+    const map = {};
+    areaTypes.value.forEach(at => { map[at.id] = at.name; });
+    return map;
+  });
   return html`
     <div class="card">
       <h2>Areas</h2>
@@ -21,7 +23,7 @@ export function AreaList() {
           ? html`<p class="empty-list">No areas found. Add your first one!</p>`
           : areas.map(a => html`
               <div class="list-item" data-id=${a.id} onClick=${() => route('/areas/' + a.id)}>
-                <span>${a.name} <small>(${typeMap[a.areaTypeId] || 'Unknown'})</small></span>
+                <span>${a.name} <small>(${typeMap.value[a.areaTypeId] || 'Unknown'})</small></span>
                 <span class="chevron">›</span>
               </div>`)}
       </div>
@@ -71,8 +73,7 @@ export function AreaDetail({ id }) {
 export function AreaCreate() {
   const [name, setName] = useState('');
   const [areaTypeId, setAreaTypeId] = useState('');
-  const [areaTypes, setAreaTypes] = useState([]);
-  useEffect(() => { AreaModel.getAllAreaTypes().then(setAreaTypes); }, []);
+  useEffect(() => { loadAreaTypes(); }, []);
   const submit = async e => {
     e.preventDefault();
     if (!name.trim() || !areaTypeId) return alert('Please fill out all fields');
@@ -95,7 +96,7 @@ export function AreaCreate() {
           <label for="areaTypeId">Area Type</label>
           <select id="areaTypeId" name="areaTypeId" value=${areaTypeId} onInput=${e => setAreaTypeId(e.target.value)} required>
             <option value="">Select</option>
-            ${areaTypes.map(t => html`<option value=${t.id}>${t.name}</option>`)}
+            ${areaTypes.value.map(t => html`<option value=${t.id}>${t.name}</option>`)}
           </select>
         </div>
         <div class="btn-group">
@@ -110,7 +111,6 @@ export function AreaCreate() {
 export function AreaEdit({ id }) {
   const [name, setName] = useState('');
   const [areaTypeId, setAreaTypeId] = useState('');
-  const [areaTypes, setAreaTypes] = useState([]);
   useEffect(() => {
     AreaModel.getById(parseInt(id)).then(a => {
       if (a) {
@@ -118,7 +118,7 @@ export function AreaEdit({ id }) {
         setAreaTypeId(String(a.areaTypeId));
       }
     });
-    AreaModel.getAllAreaTypes().then(setAreaTypes);
+    loadAreaTypes();
   }, [id]);
   const submit = async e => {
     e.preventDefault();
@@ -150,7 +150,7 @@ export function AreaEdit({ id }) {
         <div class="form-group">
           <label for="areaTypeId">Area Type</label>
           <select id="areaTypeId" name="areaTypeId" value=${areaTypeId} onInput=${e => setAreaTypeId(e.target.value)} required>
-            ${areaTypes.map(t => html`<option value=${t.id} selected=${String(t.id)===areaTypeId}>${t.name}</option>`)}
+            ${areaTypes.value.map(t => html`<option value=${t.id} selected=${String(t.id)===areaTypeId}>${t.name}</option>`)}
           </select>
         </div>
         <div class="btn-group">
