@@ -118,6 +118,11 @@ nav a:hover, nav a:focus {
     background-color: var(--primary-light);
 }
 
+nav li.active > a {
+    background-color: var(--primary-light);
+    font-weight: bold;
+}
+
 /* Main content */
 main {
     padding: 1rem;
