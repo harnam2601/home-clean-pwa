@@ -1,6 +1,5 @@
 // Area Groups UI component
 import * as AreaGroupModel from '../models/areaGroup.js';
-import router from './app.js';
 
 // List view
 export async function listView() {

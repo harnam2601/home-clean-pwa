@@ -1,7 +1,6 @@
 // Items UI component
 import * as ItemModel from '../models/item.js';
 import { calculateStatus } from '../db.js';
-import router from './app.js';
 
 // List view
 export async function listView() {

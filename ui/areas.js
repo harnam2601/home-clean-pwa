@@ -1,6 +1,5 @@
 // Areas UI component
 import * as AreaModel from '../models/area.js';
-import router from './app.js';
 
 // List view
 export async function listView() {
